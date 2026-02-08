@@ -1,0 +1,703 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AgroInglesClub | Inglés Profesional para el Sector Agropecuario</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    <style>
+        :root {
+            --earth-dark: #3D2817;
+            --earth-medium: #5D4037;
+            --earth-light: #8D6E63;
+            --leaf-dark: #1B5E20;
+            --leaf-medium: #2E7D32;
+            --leaf-light: #4CAF50;
+            --harvest-gold: #F9A825;
+            --cream: #F5F5DC;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #FAFAF5;
+            color: var(--earth-dark);
+            overflow-x: hidden;
+        }
+        
+        h1, h2, h3, .serif {
+            font-family: 'Playfair Display', serif;
+        }
+        
+        /* Organic Grain Texture */
+        .grain-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 9999;
+            opacity: 0.03;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+        }
+        
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 10px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #F5F5DC;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: var(--leaf-medium);
+            border-radius: 5px;
+        }
+        
+        /* Animations */
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+        }
+        
+        .animate-float {
+            animation: float 6s ease-in-out infinite;
+        }
+        
+        .leaf-pattern {
+            background-image: radial-gradient(circle at 100% 100%, transparent 25%, rgba(46, 125, 50, 0.05) 25%, rgba(46, 125, 50, 0.05) 50%, transparent 50%);
+            background-size: 60px 60px;
+        }
+        
+        .package-card {
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 2px solid transparent;
+        }
+        
+        .package-card:hover {
+            transform: translateY(-10px);
+            border-color: var(--leaf-medium);
+            box-shadow: 0 20px 40px -15px rgba(46, 125, 50, 0.3);
+        }
+        
+        .btn-organic {
+            background: linear-gradient(135deg, var(--leaf-medium) 0%, var(--leaf-dark) 100%);
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-organic::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s;
+        }
+        
+        .btn-organic:hover::before {
+            left: 100%;
+        }
+        
+        .btn-earth {
+            background: linear-gradient(135deg, var(--earth-medium) 0%, var(--earth-dark) 100%);
+        }
+        
+        /* Canvas Container */
+        #hero-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+        }
+        
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(46, 125, 50, 0.1);
+        }
+        
+        .section-reveal {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        
+        /* Roots decoration */
+        .roots-decoration {
+            position: absolute;
+            bottom: -50px;
+            left: 0;
+            width: 100%;
+            height: 100px;
+            background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 320'%3E%3Cpath fill='%233D2817' fill-opacity='0.05' d='M0,224L48,213.3C96,203,192,181,288,181.3C384,181,480,203,576,224C672,245,768,267,864,250.7C960,235,1056,181,1152,165.3C1248,149,1344,171,1392,181.3L1440,192L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z'%3E%3C/path%3E%3C/svg%3E") no-repeat bottom;
+            background-size: cover;
+        }
+
+        /* WhatsApp Button Animation */
+        @keyframes pulse-green {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(37, 211, 102, 0.7); }
+            70% { box-shadow: 0 0 0 20px rgba(37, 211, 102, 0); }
+        }
+        
+        .whatsapp-pulse {
+            animation: pulse-green 2s infinite;
+        }
+    </style>
+</head>
+<body class="antialiased">
+    <div class="grain-overlay"></div>
+    
+    <!-- Navigation -->
+    <nav class="fixed w-full z-50 transition-all duration-300" id="navbar">
+        <div class="glass-panel border-b border-green-100/50">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex justify-between items-center h-20">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-10 h-10 bg-gradient-to-br from-green-700 to-green-900 rounded-full flex items-center justify-center text-white font-bold text-lg serif">A</div>
+                        <span class="text-2xl font-bold serif text-green-900 tracking-tight">AgroInglesClub</span>
+                    </div>
+                    <div class="hidden md:flex space-x-8">
+                        <a href="#programas" class="text-amber-900 hover:text-green-700 font-medium transition-colors">Programas</a>
+                        <a href="#instructora" class="text-amber-900 hover:text-green-700 font-medium transition-colors">Instructora</a>
+                        <a href="#contacto" class="text-amber-900 hover:text-green-700 font-medium transition-colors">Contacto</a>
+                    </div>
+                    <a href="#contacto" class="btn-organic text-white px-6 py-2.5 rounded-full font-medium shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all">
+                        Inscribirme
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="relative min-h-screen flex items-center justify-center overflow-hidden bg-gradient-to-b from-green-50 via-amber-50/30 to-white">
+        <canvas id="hero-canvas"></canvas>
+        
+        <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center pt-20">
+            <div class="inline-block mb-6 px-4 py-1.5 rounded-full bg-green-100 text-green-800 text-sm font-semibold tracking-wide uppercase border border-green-200 animate-float">
+                🌱 Programa Exclusivo para el sector agropecuario
+            </div>
+            <h1 class="text-5xl md:text-7xl font-bold text-green-950 mb-6 leading-tight serif">
+                Domina el Inglés<br>
+                <span class="text-transparent bg-clip-text bg-gradient-to-r from-green-700 to-amber-700">Abrí puertas internacionales</span>
+            </h1>
+            <p class="text-xl md:text-2xl text-amber-900/80 max-w-3xl mx-auto mb-10 font-light leading-relaxed">
+                 Capacitación práctica y especializada para comunicarte con seguridad en contextos reales del agro, dentro y fuera del país.
+            </p>
+            <div class="flex flex-col sm:flex-row gap-4 justify-center items-center">
+                <a href="#programas" class="btn-organic text-white px-8 py-4 rounded-full text-lg font-semibold shadow-xl hover:shadow-2xl transform hover:-translate-y-1 transition-all flex items-center gap-2">
+                    Ver Programas
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path></svg>
+                </a>
+                <a href="https://linkedin.com/in/scheibengrafcarola/" target="_blank" class="px-8 py-4 rounded-full text-lg font-semibold border-2 border-green-700 text-green-800 hover:bg-green-50 transition-all flex items-center gap-2">
+                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/></svg>
+                    Conectar en LinkedIn
+                </a>
+            </div>
+            
+            <div class="mt-16 grid grid-cols-1 md:grid-cols-3 gap-8 max-w-4xl mx-auto">
+                <div class="text-center">
+                    <div class="text-3xl font-bold text-green-800 serif">3 Meses</div>
+                    <div class="text-amber-800/70">Duración del programa</div>
+                </div>
+                <div class="text-center border-x border-green-200">
+                    <div class="text-3xl font-bold text-green-800 serif">100% Online</div>
+                    <div class="text-amber-800/70">Con clases grabadas para ver en cualquier momento</div>
+                </div>
+                <div class="text-center">
+                    <div class="text-3xl font-bold text-green-800 serif">3 Módulos</div>
+                    <div class="text-amber-800/70">Especializados</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="roots-decoration"></div>
+    </section>
+
+    <!-- Programs Section -->
+    <section id="programas" class="py-24 bg-white relative leaf-pattern">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16 section-reveal">
+                <h2 class="text-4xl md:text-5xl font-bold text-green-950 mb-4 serif">Nuestros Paquetes de Capacitación</h2>
+                <p class="text-xl text-amber-900/70 max-w-2xl mx-auto">Tres módulos diseñados para cubrir todas las necesidades comunicativas del profesional agropecuario moderno.</p>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <!-- Package 1 -->
+                <div class="package-card bg-gradient-to-b from-green-50 to-white rounded-3xl p-8 relative overflow-hidden section-reveal group">
+                    <div class="absolute top-0 right-0 w-32 h-32 bg-green-200 rounded-full blur-3xl opacity-30 -mr-16 -mt-16 group-hover:scale-150 transition-transform duration-700"></div>
+                    <div class="relative z-10">
+                        <div class="w-16 h-16 bg-green-100 rounded-2xl flex items-center justify-center mb-6 text-3xl">📚</div>
+                        <h3 class="text-2xl font-bold text-green-900 mb-3 serif">English Grammar Essentials</h3>
+                        <p class="text-amber-900/70 mb-6 leading-relaxed">Fortalece las bases del inglés y aplícalas en situaciones reales del sector agropecuario.</p>
+                        
+                        <ul class="space-y-3 mb-8">
+                            <li class="flex items-start gap-3">
+                                <svg class="w-5 h-5 text-green-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                                <span class="text-amber-900/80 text-sm">Tiempos verbales y question forms</span>
+                            </li>
+                            <li class="flex items-start gap-3">
+                                <svg class="w-5 h-5 text-green-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                                <span class="text-amber-900/80 text-sm">Verbos regulares e irregulares técnicos</span>
+                            </li>
+                            <li class="flex items-start gap-3">
+                                <svg class="w-5 h-5 text-green-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                                <span class="text-amber-900/80 text-sm">Comparativos para análisis de lotes</span>
+                            </li>
+                            <li class="flex items-start gap-3">
+                                <svg class="w-5 h-5 text-green-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                                <span class="text-amber-900/80 text-sm">Phrasal verbs y modal verbs</span>
+                            </li>
+                            <li class="flex items-start gap-3">
+                                <svg class="w-5 h-5 text-green-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                                <span class="text-amber-900/80 text-sm">Passive voice y conditionals</span>
+                            </li>
+                        </ul>
+                        
+                        <div class="pt-6 border-t border-green-200">
+                            <div class="flex justify-between items-center">
+                                <span class="text-sm text-amber-800 font-medium">4 clases • 1 mes</span>
+                                <button onclick="selectPackage('grammar')" class="text-green-700 font-semibold hover:text-green-900 flex items-center gap-1 transition-colors">
+                                    Seleccionar <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Package 2 -->
+                <div class="package-card bg-gradient-to-b from-amber-50 to-white rounded-3xl p-8 relative overflow-hidden section-reveal group border-amber-200">
+                    <div class="absolute top-0 right-0 w-32 h-32 bg-amber-200 rounded-full blur-3xl opacity-40 -mr-16 -mt-16 group-hover:scale-150 transition-transform duration-700"></div>
+                    <div class="absolute -top-1 -right-1 bg-amber-600 text-white text-xs font-bold px-3 py-1 rounded-bl-xl rounded-tr-2xl">MÁS POPULAR</div>
+                    <div class="relative z-10">
+                        <div class="w-16 h-16 bg-amber-100 rounded-2xl flex items-center justify-center mb-6 text-3xl">🌾</div>
+                        <h3 class="text-2xl font-bold text-green-900 mb-3 serif">Technical English for Agronomy</h3>
+                        <p class="text-amber-900/70 mb-6 leading-relaxed">Desarrolla habilidades para comunicar información técnica sobre manejo de cultivos y suelos.</p>
+                        
+                        <ul class="space-y-3 mb-8">
+                            <li class="flex items-start gap-3">
+                                <svg class="w-5 h-5 text-amber-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                                <span class="text-amber-900/80 text-sm">Vocabulario técnico de suelos</span>
+                            </li>
+                            <li class="flex items-start gap-3">
+                                <svg class="w-5 h-5 text-amber-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                                <span class="text-amber-900/80 text-sm">Descripción de perfiles y horizontes</span>
+                            </li>
+                            <li class="flex items-start gap-3">
+                                <svg class="w-5 h-5 text-amber-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                                <span class="text-amber-900/80 text-sm">Manejo de cultivo y operaciones</span>
+                            </li>
+                            <li class="flex items-start gap-3">
+                                <svg class="w-5 h-5 text-amber-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                                <span class="text-amber-900/80 text-sm">Análisis de datos agronómicos</span>
+                            </li>
+                            <li class="flex items-start gap-3">
+                                <svg class="w-5 h-5 text-amber-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                                <span class="text-amber-900/80 text-sm">Redacción de informes técnicos</span>
+                            </li>
+                        </ul>
+                        
+                        <div class="pt-6 border-t border-amber-200">
+                            <div class="flex justify-between items-center">
+                                <span class="text-sm text-amber-800 font-medium">4 clases • 1 mes</span>
+                                <button onclick="selectPackage('technical')" class="text-amber-700 font-semibold hover:text-amber-900 flex items-center gap-1 transition-colors">
+                                    Seleccionar <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Package 3 -->
+                <div class="package-card bg-gradient-to-b from-green-50 to-white rounded-3xl p-8 relative overflow-hidden section-reveal group">
+                    <div class="absolute top-0 right-0 w-32 h-32 bg-green-200 rounded-full blur-3xl opacity-30 -mr-16 -mt-16 group-hover:scale-150 transition-transform duration-700"></div>
+                    <div class="relative z-10">
+                        <div class="w-16 h-16 bg-green-100 rounded-2xl flex items-center justify-center mb-6 text-3xl">🤝</div>
+                        <h3 class="text-2xl font-bold text-green-900 mb-3 serif">Professional Profile & Networking</h3>
+                        <p class="text-amber-900/70 mb-6 leading-relaxed">Aprende a presentarte profesionalmente y manejar situaciones de networking en el ámbito agropecuario.</p>
+                        
+                        <ul class="space-y-3 mb-8">
+                            <li class="flex items-start gap-3">
+                                <svg class="w-5 h-5 text-green-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                                <span class="text-amber-900/80 text-sm">Presentación personal y profesional</span>
+                            </li>
+                            <li class="flex items-start gap-3">
+                                <svg class="w-5 h-5 text-green-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                                <span class="text-amber-900/80 text-sm">Estructuración de CV en inglés</span>
+                            </li>
+                            <li class="flex items-start gap-3">
+                                <svg class="w-5 h-5 text-green-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                                <span class="text-amber-900/80 text-sm">Simulación de entrevistas laborales</span>
+                            </li>
+                            <li class="flex items-start gap-3">
+                                <svg class="w-5 h-5 text-green-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                                <span class="text-amber-900/80 text-sm">Habilidades de networking</span>
+                            </li>
+                            <li class="flex items-start gap-3">
+                                <svg class="w-5 h-5 text-green-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                                <span class="text-amber-900/80 text-sm">Simulación de congresos</span>
+                            </li>
+                        </ul>
+                        
+                        <div class="pt-6 border-t border-green-200">
+                            <div class="flex justify-between items-center">
+                                <span class="text-sm text-amber-800 font-medium">4 clases • 1 mes</span>
+                                <button onclick="selectPackage('networking')" class="text-green-700 font-semibold hover:text-green-900 flex items-center gap-1 transition-colors">
+                                    Seleccionar <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Full Program CTA -->
+            <div class="mt-12 text-center section-reveal">
+                <div class="inline-flex flex-col sm:flex-row items-center gap-4 bg-gradient-to-r from-green-800 to-amber-800 text-white p-8 rounded-3xl shadow-2xl">
+                    <div class="text-left">
+                        <h4 class="text-2xl font-bold serif mb-2">Programa Completo AgroInglesClub</h4>
+                        <p class="text-green-100">Los 3 módulos • 3 meses • 1 clase habilitada cada semana + grabaciones</p>
+                    </div>
+                    <button onclick="selectPackage('full')" class="bg-white text-green-900 px-8 py-3 rounded-full font-bold hover:bg-green-50 transition-colors whitespace-nowrap">
+                        Quiero el Programa Completo
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Instructor Section -->
+    <section id="instructora" class="py-24 bg-gradient-to-b from-amber-50/50 to-white relative overflow-hidden">
+        <div class="absolute inset-0 opacity-5">
+            <div class="absolute inset-0" style="background-image: repeating-linear-gradient(45deg, transparent, transparent 35px, rgba(46,125,50,.1) 35px, rgba(46,125,50,.1) 70px);"></div>
+        </div>
+        
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+                <div class="section-reveal">
+                    <div class="relative">
+                        <div class="absolute -inset-4 bg-gradient-to-r from-green-600 to-amber-600 rounded-3xl opacity-20 blur-2xl"></div>
+                        <div class="relative bg-white p-8 rounded-3xl shadow-xl border border-green-100">
+                            <div class="w-full h-80 rounded-2xl mb-6 overflow-hidden relative bg-gradient-to-br from-green-100 to-amber-100">
+                                <img src="./assets/yoo.jpeg" 
+                                     alt="Ing. Agr. Carola Scheibengraf trabajando en campo" 
+                                     class="w-full h-full object-cover object-center hover:scale-105 transition-transform duration-500"
+                                     style="object-position: center 30%;">
+                            </div>
+                            <div class="flex items-center gap-4 mb-4">
+                                <div>
+                                    <h3 class="text-2xl font-bold text-green-900 serif">Ing. Agr. Carola Scheibengraf</h3>
+                                    <p class="text-amber-700 font-medium">Fundadora de AgroInglesClub</p>
+                                </div>
+                            </div>
+                            <p class="text-amber-900/70 leading-relaxed">
+                                Ingeniera Agrónoma especializada en comunicación técnica internacional. Con experiencia internacional en laboratorio y campo, desarrolló este programa único para cerrar la brecha entre el conocimiento técnico agronómico y la comunicación efectiva en inglés.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="section-reveal">
+                    <h2 class="text-4xl md:text-5xl font-bold text-green-950 mb-6 serif">Aprende con una experta del sector</h2>
+                    <p class="text-lg text-amber-900/80 mb-8 leading-relaxed">
+                        Este no es un curso de inglés genérico. Cada ejemplo, cada ejercicio y cada simulación está diseñado específicamente para profesionales del agro que necesitan comunicarse con precisión técnica en contextos reales de campo, laboratorio y negocios.
+                    </p>
+                    
+                    <div class="space-y-4">
+                        <div class="flex items-start gap-4">
+                            <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0 text-green-700 font-bold">1</div>
+                            <div>
+                                <h4 class="font-bold text-green-900 mb-1">Enfoque Práctico</h4>
+                                <p class="text-amber-900/70 text-sm">Casos reales del sector, no ejercicios genéricos de textbook.</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start gap-4">
+                            <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0 text-green-700 font-bold">2</div>
+                            <div>
+                                <h4 class="font-bold text-green-900 mb-1">Flexibilidad Total</h4>
+                                <p class="text-amber-900/70 text-sm">Grabaciones disponibles 24/7 + Ejercicios en Google Forms para practicar.</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start gap-4">
+                            <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0 text-green-700 font-bold">3</div>
+                            <div>
+                                <h4 class="font-bold text-green-900 mb-1">Networking Real</h4>
+                                <p class="text-amber-900/70 text-sm">Armá tu red en el agro internacional y crecé con ella.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Section con WhatsApp -->
+    <section id="contacto" class="py-24 bg-gradient-to-b from-white to-green-50 relative">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-12 section-reveal">
+                <h2 class="text-4xl md:text-5xl font-bold text-green-950 mb-4 serif">Comienza tu Capacitación</h2>
+                <p class="text-xl text-amber-900/70">Completa el formulario y te contactaré para coordinar tu inscripción.</p>
+            </div>
+
+            <div class="bg-white rounded-3xl shadow-2xl p-8 md:p-12 border border-green-100 section-reveal">
+                <!-- FORMULARIO WHATSAPP -->
+                <form id="whatsappForm" onsubmit="enviarWhatsApp(event)" class="space-y-6">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-sm font-semibold text-amber-900 mb-2">Nombre completo *</label>
+                            <input type="text" id="nombre" required class="w-full px-4 py-3 rounded-xl border border-green-200 focus:border-green-500 focus:ring-2 focus:ring-green-200 outline-none transition-all bg-green-50/30" placeholder="Tu nombre">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-amber-900 mb-2">Email *</label>
+                            <input type="email" id="email" required class="w-full px-4 py-3 rounded-xl border border-green-200 focus:border-green-500 focus:ring-2 focus:ring-green-200 outline-none transition-all bg-green-50/30" placeholder="tu@email.com">
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-sm font-semibold text-amber-900 mb-2">País *</label>
+                            <input type="text" id="pais" required class="w-full px-4 py-3 rounded-xl border border-green-200 focus:border-green-500 focus:ring-2 focus:ring-green-200 outline-none transition-all bg-green-50/30" placeholder="Ej: Argentina, México, Colombia...">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-amber-900 mb-2">Paquete de interés *</label>
+                            <select id="paquete" required class="w-full px-4 py-3 rounded-xl border border-green-200 focus:border-green-500 focus:ring-2 focus:ring-green-200 outline-none transition-all bg-green-50/30">
+                                <option value="">Seleccionar...</option>
+                                <option value="Programa Completo (3 módulos)">Programa Completo (3 módulos)</option>
+                                <option value="Módulo 1: English Grammar Essentials">Módulo 1: English Grammar Essentials</option>
+                                <option value="Módulo 2: Technical English">Módulo 2: Technical English for Agronomy</option>
+                                <option value="Módulo 3: Networking">Módulo 3: Professional Profile & Networking</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-semibold text-amber-900 mb-2">Mensaje (opcional)</label>
+                        <textarea id="mensaje" rows="4" class="w-full px-4 py-3 rounded-xl border border-green-200 focus:border-green-500 focus:ring-2 focus:ring-green-200 outline-none transition-all bg-green-50/30" placeholder="¿Tienes alguna consulta específica? ¿Cuándo te gustaría comenzar?"></textarea>
+                    </div>
+
+                    <button type="submit" class="w-full bg-[#25D366] hover:bg-[#128C7E] text-white py-4 rounded-xl font-bold text-lg shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all flex items-center justify-center gap-3 whatsapp-pulse">
+                        <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>
+                        Enviar solicitud por WhatsApp
+                    </button>
+                    
+                    <p class="text-center text-sm text-amber-800/60 mt-4">
+                        Al hacer clic se abrirá WhatsApp con tu mensaje pre-armado. Solo debes enviarlo.
+                    </p>
+                </form>
+
+                <!-- Contacto Directo -->
+                <div class="mt-8 pt-8 border-t border-green-100 grid grid-cols-1 md:grid-cols-3 gap-6 text-center">
+                    <a href="mailto:inglesconcarolasch@gmail.com" class="flex flex-col items-center gap-2 text-amber-800 hover:text-green-700 transition-colors group">
+                        <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center group-hover:bg-green-200 transition-colors">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+                        </div>
+                        <span class="text-sm font-medium">inglesconcarolasch@gmail.com</span>
+                    </a>
+                    <a href="https://wa.me/14793010360" target="_blank" class="flex flex-col items-center gap-2 text-amber-800 hover:text-green-700 transition-colors group">
+                        <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center group-hover:bg-green-200 transition-colors">
+                            <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>
+                        </div>
+                        <span class="text-sm font-medium">+1 479 301 0360</span>
+                    </a>
+                    <a href="https://linkedin.com/in/scheibengrafcarola/" target="_blank" class="flex flex-col items-center gap-2 text-amber-800 hover:text-green-700 transition-colors group">
+                        <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center group-hover:bg-green-200 transition-colors">
+                            <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/></svg>
+                        </div>
+                        <span class="text-sm font-medium">LinkedIn</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-gradient-to-b from-green-950 to-green-900 text-green-100 py-12 border-t border-green-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex flex-col md:flex-row justify-between items-center gap-6">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 bg-green-800 rounded-full flex items-center justify-center text-white font-bold serif">A</div>
+                    <span class="text-2xl font-bold serif">AgroInglesClub</span>
+                </div>
+                <div class="text-center md:text-right text-green-300/80 text-sm">
+                    <p>© 2024 AgroInglesClub. Todos los derechos reservados.</p>
+                    <p class="mt-1">Marca registrada • Ing. Agr. Carola Scheibengraf</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Particle Animation for Hero
+        const canvas = document.getElementById('hero-canvas');
+        const ctx = canvas.getContext('2d');
+        let width, height;
+        let particles = [];
+
+        function resize() {
+            width = canvas.width = window.innerWidth;
+            height = canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resize);
+        resize();
+
+        class Particle {
+            constructor() {
+                this.reset();
+            }
+            
+            reset() {
+                this.x = Math.random() * width;
+                this.y = Math.random() * height;
+                this.size = Math.random() * 3 + 1;
+                this.speedX = (Math.random() - 0.5) * 0.5;
+                this.speedY = (Math.random() - 0.5) * 0.5;
+                this.opacity = Math.random() * 0.5 + 0.1;
+                this.color = Math.random() > 0.5 ? 'rgba(46, 125, 50,' : 'rgba(249, 168, 37,';
+            }
+            
+            update() {
+                this.x += this.speedX;
+                this.y += this.speedY;
+                
+                if (this.x < 0 || this.x > width || this.y < 0 || this.y > height) {
+                    this.reset();
+                }
+            }
+            
+            draw() {
+                ctx.fillStyle = this.color + this.opacity + ')';
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
+        for (let i = 0; i < 50; i++) {
+            particles.push(new Particle());
+        }
+
+        function animate() {
+            ctx.clearRect(0, 0, width, height);
+            particles.forEach(p => {
+                p.update();
+                p.draw();
+            });
+            requestAnimationFrame(animate);
+        }
+        animate();
+
+        // GSAP Scroll Animations
+        gsap.registerPlugin(ScrollTrigger);
+        
+        gsap.utils.toArray('.section-reveal').forEach(element => {
+            gsap.to(element, {
+                opacity: 1,
+                y: 0,
+                duration: 1,
+                ease: "power3.out",
+                scrollTrigger: {
+                    trigger: element,
+                    start: "top 85%",
+                    toggleActions: "play none none reverse"
+                }
+            });
+        });
+
+        // Navbar scroll effect
+        let lastScroll = 0;
+        window.addEventListener('scroll', () => {
+            const navbar = document.getElementById('navbar');
+            const currentScroll = window.pageYOffset;
+            
+            if (currentScroll > 100) {
+                navbar.classList.add('shadow-lg');
+            } else {
+                navbar.classList.remove('shadow-lg');
+            }
+            lastScroll = currentScroll;
+        });
+
+        // Package selection
+        function selectPackage(packageName) {
+            const select = document.getElementById('paquete');
+            if(select) {
+                // Mapear nombres de paquetes a valores del select
+                const map = {
+                    'grammar': 'Módulo 1: English Grammar Essentials',
+                    'technical': 'Módulo 2: Technical English',
+                    'networking': 'Módulo 3: Networking',
+                    'full': 'Programa Completo (3 módulos)'
+                };
+                select.value = map[packageName] || packageName;
+            }
+            document.getElementById('contacto').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // WhatsApp Function
+        function enviarWhatsApp(e) {
+            e.preventDefault();
+            
+            const nombre = document.getElementById('nombre').value;
+            const email = document.getElementById('email').value;
+            const pais = document.getElementById('pais').value;
+            const paquete = document.getElementById('paquete').value;
+            const mensaje = document.getElementById('mensaje').value;
+            
+            // Construir mensaje
+            let texto = `¡Hola Carola! 👋\n\n`;
+            texto += `Me interesa inscribirme en *AgroInglesClub*.\n\n`;
+            texto += `*Mis datos:*\n`;
+            texto += `• Nombre: ${nombre}\n`;
+            texto += `• Email: ${email}\n`;
+            texto += `• País: ${pais}\n`;
+            texto += `• Paquete de interés: ${paquete}\n`;
+            
+            if(mensaje && mensaje.trim() !== '') {
+                texto += `\n*Consulta:* ${mensaje}\n`;
+            }
+            
+            texto += `\nQuedo atento/a a tus indicaciones para completar la inscripción. ¡Gracias! 🌱`;
+            
+            // Número de WhatsApp (sin el +)
+            const telefono = '14793010360';
+            
+            // Crear URL de WhatsApp
+            const url = `https://wa.me/${telefono}?text=${encodeURIComponent(texto)}`;
+            
+            // Abrir WhatsApp
+            window.open(url, '_blank');
+            
+            // Feedback visual
+            const btn = e.target.querySelector('button[type="submit"]');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '✓ Mensaje preparado en WhatsApp';
+            btn.classList.remove('whatsapp-pulse');
+            btn.classList.add('bg-green-700');
+            
+            setTimeout(() => {
+                btn.innerHTML = originalText;
+                btn.classList.add('whatsapp-pulse');
+                btn.classList.remove('bg-green-700');
+            }, 3000);
+        }
+
+        // Smooth scroll for navigation
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            });
+        });
+    </script>
+</body>
+</html>
